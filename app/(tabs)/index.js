@@ -7,13 +7,17 @@ import { HelloWave } from '@/components/HelloWave';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 
+
+
 export default function HomeScreen() {
   const [recipes, setRecipes] = useState([]);
   const [selectedRecipes, setSelectedRecipes] = useState([]);
   const navigation = useNavigation();
 
+  const apiKey = process.env.EXPO_PUBLIC_SPOONACULAR_API_KEY;
+
   useEffect(() => {
-    axios.get('https://api.spoonacular.com/recipes/random?number=5&apiKey=5f66d1a8b40f4328b6b8c5d9e3ec3199')
+    axios.get(`https://api.spoonacular.com/recipes/random?number=5&apiKey=${apiKey}`)
       .then(response => setRecipes(response.data.recipes))
       .catch(error => console.error(error));
   }, []);
