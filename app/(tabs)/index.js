@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Image, StyleSheet, FlatList, TouchableOpacity, Button, Text, View, ScrollView, ActivityIndicator } from 'react-native';
+import { Image, StyleSheet, FlatList, TouchableOpacity, Button, Text, View, ScrollView, ActivityIndicator, SafeAreaView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { Ionicons as Icon } from '@expo/vector-icons';
 import axios from 'axios';
 
 import { HelloWave } from '@/components/HelloWave';
@@ -33,9 +34,12 @@ export default function HomeScreen() {
   };
 
   const getRecipeById = async (id) => {
-    axios.get(`https://api.spoonacular.com/recipes/${id}/information?apiKey=${apiKey}`)
-    .then(response => console.log(response))
-    .catch(error => console.error(error));
+    try {
+      const response = await axios.get(`https://api.spoonacular.com/recipes/${id}/information?apiKey=${apiKey}&includeNutrition=true`);
+      return response.data;
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   useEffect(() => {
@@ -45,7 +49,7 @@ export default function HomeScreen() {
 
   const handleRecipePress = (recipe) => {
     setSelectedRecipes(prevSelectedRecipes => {
-      if (prevSelectedRecipes.includes(recipe)) {
+      if (prevSelectedRecipes.some(r => r.id === recipe.id)) {
         return prevSelectedRecipes.filter(r => r.id !== recipe.id);
       } else {
         return [...prevSelectedRecipes, recipe];
@@ -53,9 +57,12 @@ export default function HomeScreen() {
     });
   };
 
-  const handleGenerateGroceryList = () => {
+  const handleGenerateGroceryList = async () => {
     if (selectedRecipes.length > 0) {
-      navigation.navigate('groceryList', { recipes: selectedRecipes });
+      const recipesWithIngredients = await Promise.all(
+        selectedRecipes.map(recipe => getRecipeById(recipe.id))
+      );
+      navigation.navigate('groceryList', { recipes: recipesWithIngredients });
     }
   };
 
@@ -63,68 +70,71 @@ export default function HomeScreen() {
     return <Text>Loading...</Text>;
   }
 
-  console.log(mealPlan)
-  const days = Object.keys(mealPlan);
-  
+  const days = mealPlan;
 
   return (
-    <View style={styles.container}>
-      {/* <FlatList
-        data={recipes}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => handleRecipePress(item)}>
-            <ThemedView style={[
-              styles.recipeContainer,
-              selectedRecipes.some(r => r.id === item.id) && styles.selectedRecipeContainer
-            ]}>
-              <ThemedText type="subtitle">{item.title}</ThemedText>
-              <Image source={{ uri: item.image }} style={styles.recipeImage} />
-            </ThemedView>
-          </TouchableOpacity>
-        )}
-      /> */}
-      {/* <FlatList
-        data={mealPlan}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => handleRecipePress(item)}>
-            <ThemedView style={[
-              styles.recipeContainer,
-              selectedRecipes.some(r => r.id === item.id) && styles.selectedRecipeContainer
-            ]}>
-              <ThemedText type="subtitle">{item}</ThemedText>
-              <Image source={{ uri: item.image }} style={styles.recipeImage} />
-            </ThemedView>
-          </TouchableOpacity>
-        )} 
-      />
-      */}
-      <ScrollView style={styles.container}>
-      {days.map((day) => (
-        <View key={day} style={styles.dayContainer}>
-          <Text style={styles.dayTitle}>{day.toUpperCase()}</Text>
-          {day.meals.map((meal) => (
-            <TouchableOpacity
-              key={meal.id}
-              style={styles.mealContainer}
-              onPress={() => navigation.navigate('MealDetail', { meal })}
-            >
-              <Text style={styles.mealTitle}>{meal.title}</Text>
-              <Text style={styles.mealDetails}>Ready in {meal.readyInMinutes} minutes</Text>
-              <Text style={styles.mealDetails}>Servings: {meal.servings}</Text>
-            </TouchableOpacity>
-          ))}
-          <View style={styles.nutrientsContainer}>
-            <Text style={styles.nutrientsTitle}>Nutrients:</Text>
-            <Text style={styles.nutrientsDetails}>Calories: {data.week[day].nutrients.calories.toFixed(2)}</Text>
-            <Text style={styles.nutrientsDetails}>Protein: {data.week[day].nutrients.protein.toFixed(2)}g</Text>
-            <Text style={styles.nutrientsDetails}>Fat: {data.week[day].nutrients.fat.toFixed(2)}g</Text>
-            <Text style={styles.nutrientsDetails}>Carbs: {data.week[day].nutrients.carbohydrates.toFixed(2)}g</Text>
-          </View>
+    <SafeAreaView style={styles.container}>
+      <ScrollView style={styles.scrollView}>
+        {/* Your existing content */}
+        <View style={styles.container}>
+          <ScrollView style={styles.container}>
+            {Object.keys(days.week).map((day) => (
+              <View key={day} style={styles.dayContainer}>
+                <Text style={styles.dayTitle}>{day.toUpperCase()}</Text>
+                {days.week[day].meals.map((meal) => (
+                  <TouchableOpacity
+                    key={meal.id}
+                    style={[
+                      styles.mealContainer,
+                      selectedRecipes.some(r => r.id === meal.id) && styles.selectedRecipeContainer
+                    ]}
+                    onPress={() => handleRecipePress(meal)}
+                  >
+                    <Image
+                      source={{ uri: `https://spoonacular.com/recipeImages/${meal.id}-312x231.${meal.imageType}` }}
+                      style={styles.mealImage}
+                    />
+                    <View style={styles.mealInfo}>
+                      <Text style={styles.mealTitle}>{meal.title}</Text>
+                      <View style={styles.mealMetaContainer}>
+                        <View style={styles.mealMeta}>
+                          <Icon name="time" size={16} color="#666" />
+                          <Text style={styles.mealDetails}>{meal.readyInMinutes} mins</Text>
+                        </View>
+                        <View style={styles.mealMeta}>
+                          <Icon name="people" size={16} color="#666" />
+                          <Text style={styles.mealDetails}>{meal.servings} servings</Text>
+                        </View>
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+                <View style={styles.nutrientsContainer}>
+                  <Text style={styles.nutrientsTitle}>Daily Nutrients</Text>
+                  <View style={styles.nutrientsGrid}>
+                    <View style={styles.nutrientItem}>
+                      <Text style={styles.nutrientValue}>{days.week[day].nutrients.calories.toFixed(0)}</Text>
+                      <Text style={styles.nutrientLabel}>Calories</Text>
+                    </View>
+                    <View style={styles.nutrientItem}>
+                      <Text style={styles.nutrientValue}>{days.week[day].nutrients.protein.toFixed(1)}g</Text>
+                      <Text style={styles.nutrientLabel}>Protein</Text>
+                    </View>
+                    <View style={styles.nutrientItem}>
+                      <Text style={styles.nutrientValue}>{days.week[day].nutrients.fat.toFixed(1)}g</Text>
+                      <Text style={styles.nutrientLabel}>Fat</Text>
+                    </View>
+                    <View style={styles.nutrientItem}>
+                      <Text style={styles.nutrientValue}>{days.week[day].nutrients.carbohydrates.toFixed(1)}g</Text>
+                      <Text style={styles.nutrientLabel}>Carbs</Text>
+                    </View>
+                  </View>
+                </View>
+              </View>
+            ))}
+          </ScrollView>
         </View>
-      ))}
-    </ScrollView>
+      </ScrollView>
       <View style={styles.buttonContainer}>
         <Button
           title="Generate Grocery List"
@@ -132,31 +142,100 @@ export default function HomeScreen() {
           disabled={selectedRecipes.length === 0}
         />
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#f5f5f5',
+    // paddingBottom: 80, 
+  },
+  dayContainer: {
+    marginBottom: 20,
     padding: 16,
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  header: {
-    backgroundColor: '#A1CEDC',
-    alignItems: 'center',
-    padding: 16,
+  dayTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 16,
+    textTransform: 'capitalize',
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  mealContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    marginBottom: 16,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#eee',
   },
-  titleContainer: {
+  mealImage: {
+    width: 120,
+    height: 120,
+    resizeMode: 'cover',
+  },
+  mealInfo: {
+    flex: 1,
+    padding: 12,
+    justifyContent: 'space-between',
+  },
+  mealTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 8,
+  },
+  mealMetaContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  mealMeta: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+  },
+  mealDetails: {
+    fontSize: 14,
+    color: '#666',
+    marginLeft: 4,
+  },
+  nutrientsContainer: {
+    marginTop: 16,
+    padding: 16,
+    backgroundColor: '#f8f8f8',
+    borderRadius: 12,
+  },
+  nutrientsTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 16,
+  },
+  nutrientsGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  nutrientItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  nutrientValue: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  nutrientLabel: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 4,
   },
   recipeContainer: {
     gap: 8,
@@ -169,12 +248,23 @@ const styles = StyleSheet.create({
     borderColor: '#0000FF',
     borderWidth: 4,
   },
-  recipeImage: {
-    height: 150,
-    width: '100%',
-    borderRadius: 8,
-  },
   buttonContainer: {
+    // position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
     padding: 16,
+    paddingBottom: 60,
+    backgroundColor: '#fff', 
+    borderTopWidth: 1,
+    borderTopColor: '#eee', 
+    elevation: 3, 
+    shadowColor: '#000', 
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  scrollView: {
+    flex: 1,
   },
 });
