@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, FlatList, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, FlatList, View, TouchableOpacity, Dimensions } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import axios from 'axios';
 
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
+
+const { width } = Dimensions.get('window');
 
 export default function GroceryListScreen() {
   const route = useRoute();
@@ -30,31 +32,47 @@ export default function GroceryListScreen() {
 
   const CustomCheckBox = ({ checked, onPress }) => (
     <TouchableOpacity onPress={onPress} style={styles.checkboxContainer}>
-      <View style={[styles.checkbox, checked && styles.checkedCheckbox]} />
+      <View style={[styles.checkbox, checked && styles.checkedCheckbox]}>
+        {checked && (
+          <IconSymbol
+            name="checkmark"
+            size={12}
+            color="#FFFFFF"
+          />
+        )}
+      </View>
     </TouchableOpacity>
   );
 
   return (
     <View style={styles.container}>
       <ThemedView style={styles.header}>
-        <IconSymbol
+        {/* <IconSymbol
           size={310}
-          color="#808080"
+          color="rgba(128, 128, 128, 0.15)"
           name="chevron.left.forwardslash.chevron.right"
           style={styles.headerImage}
-        />
-        <ThemedText type="title">Grocery List</ThemedText>
+        /> */}
+        <ThemedText style={styles.headerTitle} type="title">
+          Grocery List
+        </ThemedText>
       </ThemedView>
       <FlatList
         data={sortedIngredients}
         keyExtractor={(item) => item.id.toString()}
+        contentContainerStyle={styles.listContainer}
         renderItem={({ item }) => (
           <ThemedView style={styles.ingredientContainer}>
             <CustomCheckBox
               checked={checkedItems[item.id] || false}
               onPress={() => handleCheck(item.id)}
             />
-            <ThemedText style={checkedItems[item.id] ? styles.checkedText : null}>
+            <ThemedText 
+              style={[
+                styles.ingredientText,
+                checkedItems[item.id] && styles.checkedText
+              ]}
+            >
               {item.original}
             </ThemedText>
           </ThemedView>
@@ -67,43 +85,79 @@ export default function GroceryListScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#F8F9FA',
   },
   header: {
-    backgroundColor: '#D0D0D0',
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
-    padding: 16,
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0, 0, 0, 0.1)',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: '600',
+    color: '#2C3E50',
   },
   headerImage: {
-    color: '#808080',
     bottom: -90,
     left: -35,
     position: 'absolute',
+    opacity: 0.7,
+  },
+  listContainer: {
+    paddingHorizontal: 16,
+    paddingTop: 12,
   },
   ingredientContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    padding: 16,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    marginBottom: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  ingredientText: {
+    fontSize: 16,
+    color: '#2C3E50',
+    flex: 1,
   },
   checkedText: {
     textDecorationLine: 'line-through',
-    color: '#888',
+    color: '#95A5A6',
   },
   checkboxContainer: {
     width: 24,
     height: 24,
-    borderWidth: 2,
-    borderColor: '#000',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 8,
+    marginRight: 12,
   },
   checkbox: {
-    width: 16,
-    height: 16,
+    width: 24,
+    height: 24,
+    borderWidth: 2,
+    borderColor: '#3498DB',
+    borderRadius: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   checkedCheckbox: {
-    backgroundColor: '#000',
+    backgroundColor: '#3498DB',
+    borderColor: '#3498DB',
   },
 });
