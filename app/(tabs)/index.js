@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Image, StyleSheet, FlatList, TouchableOpacity, Button, Text, View, ScrollView, ActivityIndicator, SafeAreaView } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+// import { useNavigation } from '@react-navigation/native';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import axios from 'axios';
+import { Redirect } from "expo-router";
+import { useAuth } from "../context/AuthContext";
+
 
 import { HelloWave } from '@/components/HelloWave';
 import { ThemedText } from '@/components/ThemedText';
@@ -15,6 +18,11 @@ export default function HomeScreen() {
   const [mealPlan, setMealPlan] = useState();
   const [selectedRecipes, setSelectedRecipes] = useState([]);
   const navigation = useNavigation();
+  const { isAuthenticated } = useAuth();
+
+  if (!isAuthenticated) {
+    return <Redirect href="/auth/LoginScreen" />;
+  }
 
   const apiKey = process.env.EXPO_PUBLIC_SPOONACULAR_API_KEY;
 
@@ -27,7 +35,6 @@ export default function HomeScreen() {
   const getMealPlan = async () => {
     axios.get(`https://api.spoonacular.com/mealplanner/generate?apiKey=${apiKey}`)
     .then(response => {
-      console.log(response.data);
       setMealPlan(response.data);
     })
     .catch(error => console.error(error));
@@ -71,6 +78,8 @@ export default function HomeScreen() {
   }
 
   const days = mealPlan;
+
+  
 
   return (
     <SafeAreaView style={styles.container}>
