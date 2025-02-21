@@ -9,17 +9,13 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.justinfitt.recipeapp",
-			"googleServicesFile": "./GoogleService-Info.plist"
+      "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      },
-      "package": "com.justinfitt.recipeapp",
-			"googleServicesFile": "./google-services.json"
+      }
     },
     "web": {
       "bundler": "metro",
@@ -36,15 +32,7 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ],
-      "expo-secure-store",
-      ["expo-build-properties", {
-        "ios": {
-          "useFrameworks": "static"
-        }
-      }],
-      "@react-native-firebase/app",
-      "@react-native-firebase/auth"
+      ]
     ],
     "experiments": {
       "typedRoutes": true
