@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "669206272142",
+    "project_id": "recipeapp-205b6",
+    "storage_bucket": "recipeapp-205b6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:669206272142:android:923e90b2148b25859851df",
+        "android_client_info": {
+          "package_name": "com.justinfitt.recipeapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "669206272142-c5bqc4lihs6jkks3slpp9g8bqujjrqr7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.justinfitt.recipeapp",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "669206272142-jbkunos4a4nl8g8rekpdi9bgu9grefd0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBnpeFHwy9jiO6Ed738RBLYUYzziwueyfQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "669206272142-jbkunos4a4nl8g8rekpdi9bgu9grefd0.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "669206272142-sejnt51i3kig4spqn9geha26egfohl00.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.justinfitt.recipeapp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
