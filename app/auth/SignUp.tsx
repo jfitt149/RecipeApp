@@ -1,42 +1,24 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, findNodeHandle } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import auth from '@react-native-firebase/auth';
-import { FirebaseError } from '@firebase/app';
 
-const SignIn = () => {
+const SignUp = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-
-  const handleSignIn = async () => {
-    setLoading(true);
-    try {
-        await auth().signInWithEmailAndPassword(email, password);
-        alert('Signed in!');
-    } catch (e: any) {
-        const error = e as FirebaseError;
-        console.error(error);
-    } finally {
-    setLoading(false);
-    }
-  };
 
   const handleSignUp = async () => {
     setLoading(true);
     try {
         await auth().createUserWithEmailAndPassword(email, password);
-        alert('User account created & signed in!');
-    } catch (e: any) {
-        const error = e as FirebaseError;
+    } catch (error) {
         console.error(error);
-    } finally {
-    setLoading(false);
-   }
+    }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Sign In</Text>
+      <Text style={styles.title}>Sign Up</Text>
       <TextInput
         style={styles.input}
         placeholder="Email"
@@ -52,7 +34,6 @@ const SignIn = () => {
         onChangeText={setPassword}
         secureTextEntry
       />
-      <Button title="Sign In" onPress={handleSignIn} />
       <Button title="Sign Up" onPress={handleSignUp} />
     </View>
   );
@@ -78,4 +59,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SignIn;
+export default SignUp;

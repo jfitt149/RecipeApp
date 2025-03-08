@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, findNodeHandle } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import auth from '@react-native-firebase/auth';
-import { FirebaseError } from '@firebase/app';
 
 const SignIn = () => {
   const [email, setEmail] = useState('');
@@ -12,26 +11,20 @@ const SignIn = () => {
     setLoading(true);
     try {
         await auth().signInWithEmailAndPassword(email, password);
-        alert('Signed in!');
-    } catch (e: any) {
-        const error = e as FirebaseError;
+    } catch (error) {
         console.error(error);
-    } finally {
-    setLoading(false);
     }
+    console.log('Email:', email);
+    console.log('Password:', password);
   };
 
   const handleSignUp = async () => {
     setLoading(true);
     try {
         await auth().createUserWithEmailAndPassword(email, password);
-        alert('User account created & signed in!');
-    } catch (e: any) {
-        const error = e as FirebaseError;
+    } catch (error) {
         console.error(error);
-    } finally {
-    setLoading(false);
-   }
+    }
   };
 
   return (
